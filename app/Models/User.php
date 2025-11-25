@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +20,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'merchant_id',
+        'latitude',
+        'longitude',
+        'address',
     ];
 
     /**
@@ -43,6 +47,45 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string',
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isMerchant(): bool
+    {
+        return $this->role === 'merchant';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Get the merchant that the user belongs to.
+     */
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
+
+    /**
+     * Get the orders for the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }
