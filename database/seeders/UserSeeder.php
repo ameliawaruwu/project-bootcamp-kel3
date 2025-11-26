@@ -29,6 +29,7 @@ class UserSeeder extends Seeder
                 'name' => 'Sate Solo Pak Komar Admin',
                 'email' => 'satesolo@example.com',
                 'address' => 'Jalan Sukapura No.76, Cipagalo, Kec. Bojongsoang, Kabupaten Bandung',
+                'password' => Hash::make('password123'),
                 'latitude' => -6.968525,
                 'longitude' => 107.637171,
             ],
