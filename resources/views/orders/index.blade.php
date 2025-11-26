@@ -1,152 +1,170 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
-                {{ __('Kelola Pesanan - Semua Pesanan') }}
-            @else
-                {{ __('Daftar Pesanan') }}
-            @endif
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ Auth::user()->isMerchant() || Auth::user()->isAdmin() ? __('Kelola Pesanan') : __('Daftar Pesanan') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
+        <div class="container"> 
+            
+            @if(session('success'))
+                <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>{{ session('success') }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="mb-0">
-                            @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
-                                Semua Pesanan
-                            @else
-                                Daftar Pesanan Saya
-                            @endif
-                        </h3>
-                        @if(Auth::user()->isCustomer())
-                            <a href="{{ route('merchants.map') }}" class="btn btn-primary">
-                                <i class="bi bi-map"></i> Pesan dari Merchant
-                            </a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">
+                        @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
+                            Semua Pesanan Masuk
+                        @else
+                            Riwayat Pesanan Saya
                         @endif
-                    </div>
+                    </h4>
+                    <small class="text-muted">Kelola dan pantau status transaksi Anda.</small>
+                </div>
 
+                @if(Auth::user()->isCustomer())
+                    <a href="{{ route('merchants.map') }}" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+                        <i class="bi bi-plus-lg me-1"></i> Pesan Baru
+                    </a>
+                @endif
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border-top: 4px solid #198754;">
+                <div class="card-body p-0">
+                    
                     @if($orders->isEmpty())
-                        <div class="alert alert-info text-center">
+                        <div class="text-center py-5">
+                            <div class="mb-3 text-muted opacity-25">
+                                <i class="bi bi-basket3 display-1"></i>
+                            </div>
+                            <h5 class="fw-bold text-muted">Belum ada pesanan saat ini.</h5>
                             @if(Auth::user()->isCustomer())
-                                <p class="mb-0">Anda belum memiliki pesanan. <a href="{{ route('merchants.map') }}" class="alert-link">Lihat merchant dan buat pesanan</a>!</p>
-                            @else
-                                <p class="mb-0">Belum ada pesanan.</p>
+                                <a href="{{ route('merchants.map') }}" class="btn btn-link text-success text-decoration-none fw-bold">Mulai belanja sekarang &rarr;</a>
                             @endif
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered">
-                                <thead class="table-light">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                                <thead class="table-dark text-uppercase small fw-bold" style="letter-spacing: 0.5px;">
                                     <tr>
-                                        <th style="width: 8%">No. Pesanan</th>
+                                        <th class="py-3 ps-4 border-0">No. Order</th>
                                         @if(Auth::user()->isCustomer())
-                                            <th style="width: 15%">Merchant</th>
+                                            <th class="py-3 border-0">Merchant</th>
                                         @endif
                                         @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
-                                            <th style="width: 12%">Pelanggan</th>
+                                            <th class="py-3 border-0">Pelanggan</th>
                                         @endif
-                                        <th style="width: 12%">Tanggal</th>
-                                        <th style="width: 22%">Alamat Pengiriman</th>
-                                        <th style="width: 12%">Total Harga</th>
-                                        <th style="width: {{ (Auth::user()->isMerchant() || Auth::user()->isAdmin()) ? '18%' : '15%' }}">Status</th>
+                                        <th class="py-3 border-0">Tanggal</th>
+                                        <th class="py-3 border-0">Alamat</th>
+                                        <th class="py-3 border-0">Total</th>
+                                        <th class="py-3 border-0">Status</th>
                                         @if(Auth::user()->isCustomer())
-                                            <th style="width: 12%">Status Pembayaran</th>
+                                            <th class="py-3 border-0">Pembayaran</th>
                                         @endif
-                                        <th style="width: 8%">Item</th>
-                                        <th style="width: 8%">Aksi</th>
+                                        <th class="py-3 pe-4 border-0 text-end">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="bg-white">
                                     @foreach($orders as $order)
-                                        <tr>
-                                            <td class="align-middle">
-                                                <strong>#{{ $order->id }}</strong>
+                                        <tr class="border-bottom border-light">
+                                            <td class="ps-4 py-3">
+                                                <span class="fw-bolder text-dark">#{{ $order->id }}</span>
                                             </td>
+
                                             @if(Auth::user()->isCustomer())
-                                                <td class="align-middle">
-                                                    <strong>{{ $order->merchant->name }}</strong><br>
-                                                    <small class="text-muted">📍 {{ Str::limit($order->merchant->address, 30) }}</small>
+                                                <td>
+                                                    <div class="fw-bold text-dark">{{ $order->merchant->name }}</div>
+                                                    <small class="text-muted d-block text-truncate" style="max-width: 200px;">
+                                                        <i class="bi bi-geo-alt me-1"></i>{{ $order->merchant->address }}
+                                                    </small>
                                                 </td>
                                             @endif
+
                                             @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
-                                                <td class="align-middle">
-                                                    {{ $order->user->name }}<br>
+                                                <td>
+                                                    <div class="fw-bold text-dark">{{ $order->user->name }}</div>
                                                     <small class="text-muted">{{ $order->user->email }}</small>
                                                 </td>
                                             @endif
-                                            <td class="align-middle">
-                                                {{ $order->created_at->format('d M Y') }}<br>
+
+                                            <td>
+                                                <div class="text-dark fw-medium">{{ $order->created_at->format('d M Y') }}</div>
                                                 <small class="text-muted">{{ $order->created_at->format('H:i') }}</small>
                                             </td>
-                                            <td class="align-middle">
-                                                {{ Str::limit($order->address, 40) }}
+
+                                            <td>
+                                                <div class="text-truncate text-secondary" style="max-width: 150px;" title="{{ $order->address }}">
+                                                    {{ $order->address }}
+                                                </div>
                                             </td>
-                                            <td class="align-middle">
-                                                <strong>Rp{{ number_format($order->total_price, 0, ',', '.') }}</strong>
+
+                                            <td>
+                                                <span class="fw-bolder text-dark">Rp{{ number_format($order->total_price, 0, ',', '.') }}</span>
+                                                <div class="small text-muted">{{ $order->orderItems->count() }} Item</div>
                                             </td>
-                                            <td class="align-middle">
+
+                                            <td>
                                                 @if(Auth::user()->isMerchant() || Auth::user()->isAdmin())
                                                     <form action="{{ route('merchant.orders.updateStatus', $order) }}" method="POST">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                                            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                                            <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
-                                                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Diproses</option>
-                                                            <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Dikirim</option>
-                                                            <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Selesai</option>
-                                                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                                                        <select name="status" class="form-select form-select-sm border bg-light rounded-pill shadow-none fw-medium" style="width: 140px; font-size: 0.85rem;" onchange="this.form.submit()">
+                                                            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>⏳ Menunggu</option>
+                                                            <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>✅ Konfirmasi</option>
+                                                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>🍳 Proses</option>
+                                                            <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>🛵 Dikirim</option>
+                                                            <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>🏁 Selesai</option>
+                                                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>❌ Batal</option>
                                                         </select>
                                                     </form>
                                                 @else
-                                                    @if($order->status == 'pending')
-                                                        <span class="badge bg-warning text-dark">Menunggu Konfirmasi</span>
-                                                    @elseif($order->status == 'confirmed')
-                                                        <span class="badge bg-primary">Dikonfirmasi</span>
-                                                    @elseif($order->status == 'processing')
-                                                        <span class="badge bg-info text-dark">Sedang Diproses</span>
-                                                    @elseif($order->status == 'delivered')
-                                                        <span class="badge bg-success">Telah Dikirim</span>
-                                                    @elseif($order->status == 'completed')
-                                                        <span class="badge bg-dark">Selesai</span>
-                                                    @elseif($order->status == 'cancelled')
-                                                        <span class="badge bg-danger">Dibatalkan</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">{{ ucfirst($order->status) }}</span>
-                                                    @endif
+                                                    @php
+                                                        $badges = [
+                                                            'pending' => 'bg-warning text-dark',
+                                                            'confirmed' => 'bg-info text-dark',
+                                                            'processing' => 'bg-primary',
+                                                            'delivered' => 'bg-primary',
+                                                            'completed' => 'bg-success',
+                                                            'cancelled' => 'bg-danger'
+                                                        ];
+                                                        $labels = [
+                                                            'pending' => 'Menunggu',
+                                                            'confirmed' => 'Dikonfirmasi',
+                                                            'processing' => 'Diproses',
+                                                            'delivered' => 'Dikirim',
+                                                            'completed' => 'Selesai',
+                                                            'cancelled' => 'Batal'
+                                                        ];
+                                                    @endphp
+                                                    <span class="badge rounded-pill {{ $badges[$order->status] ?? 'bg-secondary' }} px-3 py-2">
+                                                        {{ $labels[$order->status] ?? ucfirst($order->status) }}
+                                                    </span>
                                                 @endif
                                             </td>
+
                                             @if(Auth::user()->isCustomer())
-                                                <td class="align-middle">
+                                                <td>
                                                     @if($order->payment_status == 'paid')
-                                                        <span class="badge bg-success">Sudah Dibayar</span>
+                                                        <span class="badge rounded-pill bg-soft-success text-success border border-success px-3">Lunas</span>
                                                     @elseif($order->payment_status == 'pending')
-                                                        <span class="badge bg-warning text-dark">Menunggu Pembayaran</span>
+                                                        <span class="badge rounded-pill bg-soft-warning text-warning border border-warning px-3">Menunggu</span>
                                                     @elseif($order->payment_status == 'failed')
-                                                        <span class="badge bg-danger">Gagal</span>
-                                                    @elseif($order->payment_status == 'expired')
-                                                        <span class="badge bg-secondary">Kadaluarsa</span>
+                                                        <span class="badge rounded-pill bg-danger px-3">Gagal</span>
                                                     @else
-                                                        <span class="badge bg-secondary">Belum Dibayar</span>
+                                                        <span class="badge rounded-pill bg-light text-muted border px-3">Belum</span>
                                                     @endif
                                                 </td>
                                             @endif
-                                            <td class="align-middle text-center">
-                                                <span class="badge bg-secondary">{{ $order->orderItems->count() }} item</span>
-                                            </td>
-                                            <td class="align-middle text-center">
-                                                <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-primary" title="Lihat Detail">
-                                                    <i class="bi bi-eye"></i> Detail
+
+                                            <td class="pe-4 text-end">
+                                                <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-light text-primary border rounded-3 fw-bold px-3" title="Lihat Detail">
+                                                    Detail
                                                 </a>
                                             </td>
                                         </tr>
@@ -154,25 +172,36 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="mt-4">
-                            <div class="alert alert-light border">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <strong>Total Pesanan:</strong> {{ $orders->count() }}
-                                    </div>
-                                    <div class="col-md-4">
-                                        <strong>Pending:</strong> {{ $orders->where('status', 'pending')->count() }}
-                                    </div>
-                                    <div class="col-md-4">
-                                        <strong>Selesai:</strong> {{ $orders->where('status', 'delivered')->count() }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     @endif
                 </div>
+                
+                @if(!$orders->isEmpty())
+                <div class="card-footer bg-white border-top py-3">
+                    <div class="row text-center text-md-start align-items-center">
+                        <div class="col-md-auto me-4">
+                            <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Total Pesanan</small>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ $orders->count() }}</div>
+                        </div>
+                        <div class="col-md-auto me-4">
+                            <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Perlu Diproses</small>
+                            <div class="h5 mb-0 fw-bold text-warning">{{ $orders->where('status', 'pending')->count() }}</div>
+                        </div>
+                        <div class="col-md-auto">
+                            <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.7rem;">Selesai</small>
+                            <div class="h5 mb-0 fw-bold text-success">{{ $orders->where('status', 'completed')->count() + $orders->where('status', 'delivered')->count() }}</div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
+
         </div>
     </div>
+    
+    <style>
+        .bg-soft-success { background-color: #d1e7dd; }
+        .bg-soft-warning { background-color: #fff3cd; }
+        /* Table spacing adjustment */
+        table tbody tr td { vertical-align: middle; padding-top: 1rem; padding-bottom: 1rem; }
+    </style>
 </x-app-layout>

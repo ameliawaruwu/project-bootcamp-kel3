@@ -1,54 +1,98 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Menu
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Kelola Menu') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <a href="{{ route('foodmenu.create') }}" class="mb-4 inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 active:bg-blue-600 disabled:opacity-25 transition">Add New Item</a>
-                   <table class="min-w-full divide-y divide-gray-200">
-                       <thead>
-                           <tr>
-                               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                               <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                           </tr>
-                       </thead>
-                       <tbody class="bg-white divide-y divide-gray-200">
-                           @foreach($foodMenus as $item)
-                               <tr>
-                                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->name }}</td>
-                                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->description }}</td>
-                                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($item->price, 2) }}</td>
-                                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        @if($item->image)
-                                             <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="h-16 w-16 object-cover">
-                                        @else
-                                             No Image
-                                        @endif
-                                      </td>
-                                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="{{ route('foodmenu.edit', $item->id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+        <div class="container">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">Daftar Menu Makanan</h4>
+                    <p class="text-muted small mb-0">Kelola katalog dan harga menu Anda.</p>
+                </div>
+                <a href="{{ route('foodmenu.create') }}" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="bi bi-plus-lg me-1"></i> Tambah Menu
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white" style="border-top: 4px solid #198754;">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark text-uppercase small fw-bold">
+                                <tr>
+                                    <th class="py-3 ps-4 border-0" style="width: 10%;">Gambar</th>
+                                    <th class="py-3 border-0" style="width: 30%;">Nama Menu</th>
+                                    <th class="py-3 border-0" style="width: 30%;">Deskripsi</th>
+                                    <th class="py-3 border-0" style="width: 15%;">Harga</th>
+                                    <th class="py-3 pe-4 border-0 text-end" style="width: 15%;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                @foreach($foodMenus as $item)
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            @if($item->image)
+                                                <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="rounded-3 object-fit-cover shadow-sm border" style="width: 60px; height: 60px;">
+                                            @else
+                                                <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-secondary border" style="width: 60px; height: 60px;">
+                                                    <i class="bi bi-image fs-4 opacity-50"></i>
+                                                </div>
+                                            @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <form action="{{ route('foodmenu.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                            </form>
+                                        <td class="py-3">
+                                            <div class="fw-bold text-dark fs-6">{{ $item->name }}</div>
                                         </td>
-                               </tr>
-                           @endforeach
-                       </tbody>
-                   </table>
+                                        <td class="py-3">
+                                            <span class="text-secondary small text-truncate d-inline-block" style="max-width: 280px;">
+                                                {{ $item->description }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="fw-bolder text-dark">Rp{{ number_format($item->price, 0, ',', '.') }}</span>
+                                        </td>
+                                        <td class="pe-4 py-3 text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="{{ route('foodmenu.edit', $item->id) }}" class="btn btn-sm btn-light text-primary rounded-3 border" title="Edit">
+                                                    <i class="bi bi-pencil-square fs-6"></i>
+                                                </a>
+                                                
+                                                <form action="{{ route('foodmenu.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-light text-danger rounded-3 border" title="Hapus">
+                                                        <i class="bi bi-trash fs-6"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+
+                                @if($foodMenus->isEmpty())
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <div class="mb-3">
+                                                <i class="bi bi-clipboard-x display-4 text-secondary opacity-25"></i>
+                                            </div>
+                                            <h6 class="fw-bold">Belum ada menu</h6>
+                                            <p class="small mb-0">Klik tombol tambah di atas untuk memulai.</p>
+                                        </td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
+            <div class="mt-4">
+                {{-- {{ $foodMenus->links() }} --}}
+            </div>
+
         </div>
     </div>
 </x-app-layout>
